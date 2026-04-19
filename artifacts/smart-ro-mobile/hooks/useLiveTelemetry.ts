@@ -21,7 +21,7 @@ const streamUrl = apiBase
   ? `${apiBase.replace(/\/$/, '')}/api/stream`
   : typeof window !== 'undefined'
   ? '/api/stream'
-  : 'http://localhost:3001/api/stream';
+  : 'http://192.168.X.X:3001/api/stream'; // 🔥 FIX: replace with your laptop IP
 
 export function useLiveTelemetry() {
   const queryClient = useQueryClient();
@@ -37,12 +37,17 @@ export function useLiveTelemetry() {
 
     const source = new EventSource(streamUrl);
     source.onopen = () => setLiveConnected(true);
+
     source.onmessage = (message) => {
       try {
         const event = JSON.parse(message.data) as TelemetryStreamEvent;
-        if (event.type !== "reading" || !event.reading?.timestamp) return;
+
+        // 🔥 FIX: safe check
+        if (!event || event.type !== "reading" || !event.reading?.timestamp) return;
+
         setLiveReading(event.reading);
-        setLastLiveAt(new Date().toISOString());
+        setLastLiveAt(Date.now().toString()); // 🔥 small improvement
+
         queryClient.setQueryData(getGetLatestReadingQueryKey(), event.reading);
         queryClient.invalidateQueries({ queryKey: getGetHistoryQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetAlertsQueryKey() });
@@ -50,6 +55,7 @@ export function useLiveTelemetry() {
         setLiveConnected(false);
       }
     };
+
     source.onerror = () => setLiveConnected(false);
 
     return () => {
