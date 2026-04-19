@@ -80,9 +80,7 @@ export function StatusBadge({ status }: { status: SensorReading["alert"] }) {
   return (
     <View style={[styles.badge, { backgroundColor: isNormal ? colors.successSoft : colors.criticalSoft }]}> 
       <View style={[styles.badgeDot, { backgroundColor: isNormal ? colors.success : colors.critical }]} />
-      <Text style={[styles.badgeText, { color: isNormal ? colors.success : colors.critical }]}>
-        {isNormal ? "Normal" : "High temperature"}
-      </Text>
+      <Text style={[styles.badgeText, { color: isNormal ? colors.success : colors.critical }]}> {isNormal ? "Normal" : "High temperature"}</Text>
     </View>
   );
 }
@@ -94,6 +92,30 @@ export function PumpBadge({ pumpState }: { pumpState: SensorReading["pumpState"]
     <View style={[styles.badge, { backgroundColor: running ? colors.successSoft : colors.warningSoft }]}> 
       <Feather name={running ? "zap" : "pause-circle"} size={14} color={running ? colors.success : colors.warning} />
       <Text style={[styles.badgeText, { color: running ? colors.success : colors.warning }]}>Pump {running ? "running" : "stopped"}</Text>
+    </View>
+  );
+}
+
+export function ConnectionPill({ label, connected, detail }: { label: string; connected: boolean; detail: string }) {
+  const colors = useColors();
+  return (
+    <View style={[styles.connectionPill, { backgroundColor: connected ? colors.successSoft : colors.warningSoft }]}> 
+      <View style={[styles.badgeDot, { backgroundColor: connected ? colors.success : colors.warning }]} />
+      <View style={styles.flexOne}>
+        <Text style={[styles.connectionLabel, { color: connected ? colors.success : colors.warning }]}>{label}: {connected ? "Online" : "Offline"}</Text>
+        <Text style={[styles.connectionDetail, { color: colors.mutedForeground }]}>{detail}</Text>
+      </View>
+    </View>
+  );
+}
+
+export function FreshnessNotice({ stale, timestamp }: { stale: boolean; timestamp?: string }) {
+  const colors = useColors();
+  if (!stale) return <ReadingTimestamp timestamp={timestamp} />;
+  return (
+    <View style={[styles.freshnessCard, { backgroundColor: colors.warningSoft, borderColor: colors.warning }]}> 
+      <Feather name="wifi-off" size={16} color={colors.warning} />
+      <Text style={[styles.freshnessText, { color: colors.foreground }]}>Live data is stale. Last update: {timestamp ? new Date(timestamp).toLocaleString() : "waiting for first reading"}</Text>
     </View>
   );
 }
@@ -125,9 +147,7 @@ export function RulePanel({ reading }: { reading: SensorReading }) {
         <Feather name={overLimit ? "thermometer" : "check-circle"} size={24} color={overLimit ? colors.critical : colors.success} />
       </View>
       <View style={styles.flexOne}>
-        <Text style={[styles.ruleTitle, { color: overLimit ? colors.critical : colors.success }]}>
-          {overLimit ? "Temperature cutoff active" : "Automatic control normal"}
-        </Text>
+        <Text style={[styles.ruleTitle, { color: overLimit ? colors.critical : colors.success }]}> {overLimit ? "Temperature cutoff active" : "Automatic control normal"}</Text>
         <Text style={[styles.ruleText, { color: colors.foreground }]}>If temperature is above {reading.threshold}°C, pump turns OFF. At {reading.threshold}°C or below, pump turns ON.</Text>
       </View>
     </View>
@@ -208,6 +228,11 @@ export const styles = StyleSheet.create({
   badge: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 7, alignSelf: "flex-start" },
   badgeDot: { width: 8, height: 8, borderRadius: 4 },
   badgeText: { fontFamily: "Inter_700Bold", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5 },
+  connectionPill: { borderRadius: 18, padding: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  connectionLabel: { fontFamily: "Inter_700Bold", fontSize: 13, textTransform: "uppercase", letterSpacing: 0.4 },
+  connectionDetail: { fontFamily: "Inter_400Regular", fontSize: 12, lineHeight: 17 },
+  freshnessCard: { borderWidth: 1, borderRadius: 18, padding: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  freshnessText: { fontFamily: "Inter_500Medium", fontSize: 13, lineHeight: 18, flex: 1 },
   sensorCard: { borderWidth: 1, borderRadius: 22, padding: 16, flex: 1, minWidth: "47%", gap: 9 },
   sensorIcon: { width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   sensorLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },

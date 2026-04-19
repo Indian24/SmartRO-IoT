@@ -37,6 +37,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SensorReading"
+        "404":
+          description: No telemetry has been received yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /history:
     get:
       operationId: getHistory
@@ -65,6 +71,12 @@ paths:
                       $ref: "#/components/schemas/SensorReading"
                 required:
                   - readings
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /status:
     get:
       operationId: getSystemStatus
@@ -105,6 +117,12 @@ paths:
                       $ref: "#/components/schemas/AlertEvent"
                 required:
                   - alerts
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -114,6 +132,15 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
     SensorReading:
       type: object
       properties:
@@ -177,6 +204,9 @@ components:
           type: boolean
         brokerUrl:
           type: string
+        lastMessageAt:
+          type: string
+          format: date-time
       required:
         - configured
         - connected
@@ -247,7 +277,9 @@ components:
         pumpRule:
           type: string
         latest:
-          $ref: "#/components/schemas/SensorReading"
+          anyOf:
+            - $ref: "#/components/schemas/SensorReading"
+            - type: "null"
         mqtt:
           $ref: "#/components/schemas/MqttConnectionStatus"
         database:

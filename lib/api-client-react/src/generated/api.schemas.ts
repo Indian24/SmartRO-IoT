@@ -9,6 +9,11 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface ErrorResponse {
+  error: string;
+  message?: string;
+}
+
 export type SensorReadingPumpState =
   (typeof SensorReadingPumpState)[keyof typeof SensorReadingPumpState];
 
@@ -58,6 +63,7 @@ export interface MqttConnectionStatus {
   configured: boolean;
   connected: boolean;
   brokerUrl?: string;
+  lastMessageAt?: string;
 }
 
 export interface DatabaseConnectionStatus {
@@ -108,7 +114,7 @@ export interface SystemStatus {
   mode: SystemStatusMode;
   threshold: number;
   pumpRule: string;
-  latest: SensorReading;
+  latest: SensorReading | null;
   mqtt: MqttConnectionStatus;
   database: DatabaseConnectionStatus;
   topics: string[];

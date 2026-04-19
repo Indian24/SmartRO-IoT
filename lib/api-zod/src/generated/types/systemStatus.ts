@@ -15,7 +15,7 @@ export interface SystemStatus {
   mode: SystemStatusMode;
   threshold: number;
   pumpRule: string;
-  latest: SensorReading;
+  latest: SensorReading | null;
   mqtt: MqttConnectionStatus;
   database: DatabaseConnectionStatus;
   topics: string[];

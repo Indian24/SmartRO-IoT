@@ -14,6 +14,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  ErrorResponse,
   GetAlerts200,
   GetAlertsParams,
   GetHistory200,
@@ -130,7 +131,7 @@ export const getGetLatestReadingQueryKey = () => {
 
 export const getGetLatestReadingQueryOptions = <
   TData = Awaited<ReturnType<typeof getLatestReading>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getLatestReading>>,
@@ -157,7 +158,7 @@ export const getGetLatestReadingQueryOptions = <
 export type GetLatestReadingQueryResult = NonNullable<
   Awaited<ReturnType<typeof getLatestReading>>
 >;
-export type GetLatestReadingQueryError = ErrorType<unknown>;
+export type GetLatestReadingQueryError = ErrorType<ErrorResponse>;
 
 /**
  * @summary Latest purifier reading
@@ -165,7 +166,7 @@ export type GetLatestReadingQueryError = ErrorType<unknown>;
 
 export function useGetLatestReading<
   TData = Awaited<ReturnType<typeof getLatestReading>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getLatestReading>>,
@@ -218,7 +219,7 @@ export const getGetHistoryQueryKey = (params?: GetHistoryParams) => {
 
 export const getGetHistoryQueryOptions = <
   TData = Awaited<ReturnType<typeof getHistory>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetHistoryParams,
   options?: {
@@ -248,7 +249,7 @@ export const getGetHistoryQueryOptions = <
 export type GetHistoryQueryResult = NonNullable<
   Awaited<ReturnType<typeof getHistory>>
 >;
-export type GetHistoryQueryError = ErrorType<unknown>;
+export type GetHistoryQueryError = ErrorType<ErrorResponse>;
 
 /**
  * @summary Historical purifier readings
@@ -256,7 +257,7 @@ export type GetHistoryQueryError = ErrorType<unknown>;
 
 export function useGetHistory<
   TData = Awaited<ReturnType<typeof getHistory>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetHistoryParams,
   options?: {
@@ -387,7 +388,7 @@ export const getGetAlertsQueryKey = (params?: GetAlertsParams) => {
 
 export const getGetAlertsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlerts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAlertsParams,
   options?: {
@@ -417,7 +418,7 @@ export const getGetAlertsQueryOptions = <
 export type GetAlertsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAlerts>>
 >;
-export type GetAlertsQueryError = ErrorType<unknown>;
+export type GetAlertsQueryError = ErrorType<ErrorResponse>;
 
 /**
  * @summary Recent purifier alerts
@@ -425,7 +426,7 @@ export type GetAlertsQueryError = ErrorType<unknown>;
 
 export function useGetAlerts<
   TData = Awaited<ReturnType<typeof getAlerts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAlertsParams,
   options?: {

@@ -9,8 +9,10 @@ Full-stack mobile application for an ESP32-based smart RO water purifier retrofi
 - MQTT intake for ESP32 telemetry topics
 - MongoDB Atlas persistence when `MONGODB_URI` is configured
 - REST APIs for latest readings, history, status, and alerts
+- Backend event stream for live mobile updates
 - Fixed 35°C automatic pump cutoff logic
 - Hardware pin map reflected in the app settings screen
+- MQTT simulator script for testing without ESP32 hardware
 
 ## Hardware pin map
 
@@ -35,29 +37,31 @@ MQTT_BROKER_URL=mqtt://broker-host:1883
 MQTT_USERNAME=
 MQTT_PASSWORD=
 MQTT_CLIENT_ID=smart-ro-api
+MQTT_SIM_INTERVAL_MS=5000
 ```
 
-If MongoDB or MQTT are not configured, the backend runs with sample in-memory telemetry so the mobile app can still be previewed.
+If MongoDB or MQTT are not configured, the backend keeps only a minimal in-memory development fallback so the app can still open locally.
 
 ## MQTT topics
 
 - `ro/sensor/temperature`
 - `ro/sensor/tds`
 - `ro/sensor/waterlevel`
-- `ro/device/pump`
 - `ro/device/status`
+- `ro/device/pump`
 - `ro/device/alert`
 
 ## Sample MQTT payload
+
+Publish a complete JSON payload to `ro/device/status` for the cleanest full-pipeline test:
 
 ```json
 {
   "temperature": 32.5,
   "tds": 189,
   "waterLevel": 4.2,
-  "pumpState": "ON",
   "threshold": 35,
-  "alert": "NORMAL"
+  "manualMode": false
 }
 ```
 
@@ -67,6 +71,7 @@ If MongoDB or MQTT are not configured, the backend runs with sample in-memory te
 - `GET /api/history?limit=60`
 - `GET /api/status`
 - `GET /api/alerts?limit=20`
+- `GET /api/stream`
 
 ## Run
 
@@ -77,3 +82,13 @@ pnpm --filter @workspace/smart-ro-mobile run dev
 ```
 
 The mobile app uses the shared API client and expects the API server to be reachable through the project domain in Replit.
+
+## Test MQTT data flow
+
+Set `MQTT_BROKER_URL` and optional credentials, start the API server, then run:
+
+```bash
+pnpm --filter @workspace/scripts run mqtt:simulate
+```
+
+The simulator publishes valid sensor readings to `ro/device/status`. The backend validates the payload, applies the unchanged 35°C cutoff rule, stores the reading, serves it through REST, and streams it live to the mobile app.

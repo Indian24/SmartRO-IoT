@@ -4,9 +4,11 @@ import { Text, View } from "react-native";
 
 import { ErrorState, LoadingState, MetricChart, ScreenShell, SectionCard } from "@/components/RoComponents";
 import { useRoSettings } from "@/contexts/RoSettingsContext";
+import { useLiveTelemetry } from "@/hooks/useLiveTelemetry";
 import { useColors } from "@/hooks/useColors";
 
 export default function HistoryScreen() {
+  useLiveTelemetry();
   const { refreshIntervalMs } = useRoSettings();
   const history = useGetHistory({ limit: 80 }, { query: { refetchInterval: refreshIntervalMs } });
   const alerts = useGetAlerts({ limit: 10 }, { query: { refetchInterval: refreshIntervalMs } });

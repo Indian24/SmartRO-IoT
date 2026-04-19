@@ -9,6 +9,7 @@
 export * from "./alertEvent";
 export * from "./alertEventSeverity";
 export * from "./databaseConnectionStatus";
+export * from "./errorResponse";
 export * from "./getAlerts200";
 export * from "./getAlertsParams";
 export * from "./getHistory200";

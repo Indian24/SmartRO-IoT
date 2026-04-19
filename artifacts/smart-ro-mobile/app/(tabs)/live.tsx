@@ -1,23 +1,24 @@
-import { useGetLatestReading, useGetSystemStatus } from "@workspace/api-client-react";
 import React from "react";
 import { Text, View } from "react-native";
 
-import { ErrorState, LoadingState, PumpBadge, ReadingTimestamp, RulePanel, ScreenShell, SectionCard, StatusBadge, formatNumber, styles } from "@/components/RoComponents";
-import { useRoSettings } from "@/contexts/RoSettingsContext";
+import { ConnectionPill, ErrorState, FreshnessNotice, LoadingState, PumpBadge, RulePanel, ScreenShell, SectionCard, StatusBadge, formatNumber, styles } from "@/components/RoComponents";
+import { useLiveTelemetry } from "@/hooks/useLiveTelemetry";
 import { useColors } from "@/hooks/useColors";
 
 export default function LiveScreen() {
   const colors = useColors();
-  const { refreshIntervalMs } = useRoSettings();
-  const latest = useGetLatestReading({ query: { refetchInterval: refreshIntervalMs } });
-  const status = useGetSystemStatus({ query: { refetchInterval: refreshIntervalMs } });
-  const reading = latest.data;
+  const telemetry = useLiveTelemetry();
+  const { latest, status, reading, refreshIntervalMs } = telemetry;
 
-  if (latest.isLoading) return <ScreenShell title="Live data"><LoadingState /></ScreenShell>;
-  if (latest.isError || !reading) return <ScreenShell title="Live data"><ErrorState message="The latest reading endpoint did not return telemetry." onRetry={() => latest.refetch()} /></ScreenShell>;
+  if (latest.isLoading && status.isLoading && !reading) return <ScreenShell title="Live data"><LoadingState /></ScreenShell>;
+  if (latest.isError && status.isError && !reading) return <ScreenShell title="Live data"><ErrorState message="The latest reading endpoint did not return telemetry." onRetry={telemetry.refetch} /></ScreenShell>;
+
+  if (!reading) {
+    return <ScreenShell title="Live data"><ErrorState message="Waiting for the first valid MQTT reading from the backend." onRetry={telemetry.refetch} /></ScreenShell>;
+  }
 
   return (
-    <ScreenShell title="Live data" subtitle="Current telemetry from temperature, TDS, water-level, and relay state." refreshing={latest.isRefetching} onRefresh={() => latest.refetch()}>
+    <ScreenShell title="Live data" subtitle="Current telemetry from temperature, TDS, water-level, and relay state." refreshing={latest.isRefetching || status.isRefetching} onRefresh={telemetry.refetch}>
       <View style={[styles.sectionCard, { backgroundColor: colors.graphite, borderColor: colors.graphite }]}> 
         <Text style={{ color: colors.primaryForeground, fontFamily: "Inter_600SemiBold", fontSize: 13 }}>Current temperature</Text>
         <Text style={{ color: colors.primaryForeground, fontFamily: "Inter_700Bold", fontSize: 56, letterSpacing: -2 }}>{formatNumber(reading.temperature)}°C</Text>
@@ -40,9 +41,10 @@ export default function LiveScreen() {
       <SectionCard title="System mode">
         <ValueRow label="Mode" value={status.data?.mode ?? "AUTOMATIC"} detail="Manual override support is reserved for the next control release" />
         <ValueRow label="Refresh interval" value={`${refreshIntervalMs / 1000}s`} detail="Adjustable in Settings" />
+        <ConnectionPill label="Live stream" connected={telemetry.liveConnected || telemetry.apiConnected} detail={telemetry.liveConnected ? "Receiving server events from backend" : "Polling REST API as fallback"} />
       </SectionCard>
 
-      <ReadingTimestamp timestamp={reading.timestamp} />
+      <FreshnessNotice stale={telemetry.isStale} timestamp={reading.timestamp} />
     </ScreenShell>
   );
 }

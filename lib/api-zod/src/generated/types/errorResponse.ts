@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface MqttConnectionStatus {
-  configured: boolean;
-  connected: boolean;
-  brokerUrl?: string;
-  lastMessageAt?: Date;
+export interface ErrorResponse {
+  error: string;
+  message?: string;
 }
