@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Smart RO purifier API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: iot
+    description: Smart RO purifier telemetry operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,86 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /latest:
+    get:
+      operationId: getLatestReading
+      tags: [iot]
+      summary: Latest purifier reading
+      responses:
+        "200":
+          description: Latest reading
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SensorReading"
+  /history:
+    get:
+      operationId: getHistory
+      tags: [iot]
+      summary: Historical purifier readings
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 60
+      responses:
+        "200":
+          description: Historical readings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  readings:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SensorReading"
+                required:
+                  - readings
+  /status:
+    get:
+      operationId: getSystemStatus
+      tags: [iot]
+      summary: Purifier system status
+      responses:
+        "200":
+          description: System status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+  /alerts:
+    get:
+      operationId: getAlerts
+      tags: [iot]
+      summary: Recent purifier alerts
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Recent alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AlertEvent"
+                required:
+                  - alerts
 components:
   schemas:
     HealthStatus:
@@ -33,4 +114,156 @@ components:
           type: string
       required:
         - status
-
+    SensorReading:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+        tds:
+          type: number
+        waterLevel:
+          type: number
+        pumpState:
+          type: string
+          enum: [ON, OFF]
+        threshold:
+          type: number
+        alert:
+          type: string
+          enum: [NORMAL, HIGH_TEMPERATURE]
+        manualMode:
+          type: boolean
+      required:
+        - id
+        - timestamp
+        - temperature
+        - tds
+        - waterLevel
+        - pumpState
+        - threshold
+        - alert
+        - manualMode
+    AlertEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        message:
+          type: string
+        reading:
+          $ref: "#/components/schemas/SensorReading"
+      required:
+        - id
+        - timestamp
+        - severity
+        - message
+    MqttConnectionStatus:
+      type: object
+      properties:
+        configured:
+          type: boolean
+        connected:
+          type: boolean
+        brokerUrl:
+          type: string
+      required:
+        - configured
+        - connected
+    DatabaseConnectionStatus:
+      type: object
+      properties:
+        configured:
+          type: boolean
+        connected:
+          type: boolean
+        provider:
+          type: string
+      required:
+        - configured
+        - connected
+        - provider
+    HardwarePinMap:
+      type: object
+      properties:
+        temperatureSensor:
+          type: object
+          properties:
+            sensor:
+              type: string
+            dataPin:
+              type: string
+          required: [sensor, dataPin]
+        waterLevelSensor:
+          type: object
+          properties:
+            analogPin:
+              type: string
+          required: [analogPin]
+        tdsSensor:
+          type: object
+          properties:
+            analogPin:
+              type: string
+          required: [analogPin]
+        relay:
+          type: object
+          properties:
+            inputPin:
+              type: string
+          required: [inputPin]
+        oledDisplay:
+          type: object
+          properties:
+            sclPin:
+              type: string
+            sdaPin:
+              type: string
+          required: [sclPin, sdaPin]
+      required:
+        - temperatureSensor
+        - waterLevelSensor
+        - tdsSensor
+        - relay
+        - oledDisplay
+    SystemStatus:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [AUTOMATIC, MANUAL_READY]
+        threshold:
+          type: number
+        pumpRule:
+          type: string
+        latest:
+          $ref: "#/components/schemas/SensorReading"
+        mqtt:
+          $ref: "#/components/schemas/MqttConnectionStatus"
+        database:
+          $ref: "#/components/schemas/DatabaseConnectionStatus"
+        topics:
+          type: array
+          items:
+            type: string
+        hardware:
+          $ref: "#/components/schemas/HardwarePinMap"
+      required:
+        - mode
+        - threshold
+        - pumpRule
+        - latest
+        - mqtt
+        - database
+        - topics
+        - hardware

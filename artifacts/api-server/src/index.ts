@@ -1,5 +1,7 @@
 import app from "./app";
+import { iotStore } from "./lib/iotStore";
 import { logger } from "./lib/logger";
+import { mqttTelemetryService } from "./lib/mqttService";
 
 const rawPort = process.env["PORT"];
 
@@ -14,6 +16,9 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+await iotStore.connect();
+mqttTelemetryService.connect();
 
 app.listen(port, (err) => {
   if (err) {

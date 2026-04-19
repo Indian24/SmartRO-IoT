@@ -5,7 +5,8 @@
  * Smart RO purifier API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SensorReading } from "./sensorReading";
 
-export interface HealthStatus {
-  status: string;
-}
+export type GetHistory200 = {
+  readings: SensorReading[];
+};

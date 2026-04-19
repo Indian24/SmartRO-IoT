@@ -5,7 +5,8 @@
  * Smart RO purifier API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AlertEvent } from "./alertEvent";
 
-export interface HealthStatus {
-  status: string;
-}
+export type GetAlerts200 = {
+  alerts: AlertEvent[];
+};

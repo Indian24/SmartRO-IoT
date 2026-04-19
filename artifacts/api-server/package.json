@@ -16,6 +16,8 @@
     "cors": "^2",
     "drizzle-orm": "catalog:",
     "express": "^5",
+    "mongodb": "^6.21.0",
+    "mqtt": "^5.14.1",
     "pino": "^9",
     "pino-http": "^10"
   },

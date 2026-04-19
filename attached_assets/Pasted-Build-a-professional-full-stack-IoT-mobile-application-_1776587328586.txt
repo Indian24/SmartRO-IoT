@@ -1,0 +1,182 @@
+Build a professional full-stack IoT mobile application for a smart RO water purifier retrofit.
+
+PROJECT OVERVIEW
+This is a hardware + software integrated system based on an ESP32. The ESP32 reads sensors from an RO purifier, sends data through MQTT, stores data in MongoDB Atlas through a Node.js + Express backend, and the mobile app is built in React Native. The app must look professional, clean, and industry-standard, not flashy. It should be easy to extend later with TinyML and additional features.
+
+CURRENT HARDWARE INPUTS
+Use the following hardware pin mapping exactly:
+
+1) Temperature sensor:
+- Sensor: DS18B20 waterproof digital temperature sensor
+- Data pin: GPIO4
+- Red wire -> 3V3
+- Black wire -> GND
+- Yellow wire -> GPIO4
+- 4.7k pull-up resistor between Red (3V3) and Yellow (DATA)
+
+2) Water level sensor:
+- Analog signal pin: GPIO35
+- + -> 3V3
+- - -> GND
+
+3) TDS sensor:
+- Analog signal pin: GPIO34
+- + -> 3V3
+- - -> GND
+- Use the analog TDS sensor already discussed in the project
+
+4) Relay:
+- IN -> GPIO25
+- VCC -> 3V3
+- GND -> GND
+
+5) OLED display:
+- GND -> GND
+- VDD -> 3V3
+- SCK/SCL -> GPIO22
+- SDA -> GPIO21
+
+PROJECT LOGIC
+- The system monitors temperature, TDS, and water level in real time.
+- The pump/relay control is based on temperature threshold logic.
+- Current threshold:
+  - If temperature > 35°C, the pump should turn OFF.
+  - If temperature <= 35°C, the pump should turn ON.
+- This threshold logic should be clearly visible in the app.
+- The app should show live sensor values and relay state.
+- The app should also support manual override later, but for now the core implementation should be automatic with clear UI indicators.
+
+TECH STACK TO USE
+- Frontend: React Native
+- Backend: Node.js + Express
+- Messaging: MQTT
+- Broker: Mosquitto
+- Database: MongoDB Atlas
+- Optional future support: TinyML / adaptive prediction, but do not implement TinyML now
+- Use Expo if it helps speed up development
+- Keep the architecture modular and production-friendly
+
+WHAT THE APP SHOULD DO
+Build a mobile app that:
+1. Shows live data:
+   - Temperature
+   - TDS
+   - Water level
+   - Relay/pump ON/OFF state
+   - System mode/status
+2. Shows a clear warning when temperature goes above 35°C
+3. Shows whether the pump is currently running or stopped
+4. Has a clean dashboard layout with cards and status indicators
+5. Shows history graphs if possible:
+   - temperature trend
+   - TDS trend
+   - water level trend
+6. Has a settings/control screen for:
+   - threshold display
+   - future manual override placeholder
+   - refresh interval
+7. Uses a professional UI style suitable for a real IoT product
+
+MQTT REQUIREMENTS
+Use MQTT for real-time communication between ESP32 and backend/app.
+
+Use topics like:
+- ro/sensor/temperature
+- ro/sensor/tds
+- ro/sensor/waterlevel
+- ro/device/pump
+- ro/device/status
+- ro/device/alert
+
+Message format should be JSON. Example:
+{
+  "temperature": 32.5,
+  "tds": 189,
+  "waterLevel": 4.2,
+  "pumpState": "ON",
+  "threshold": 35,
+  "alert": "NORMAL"
+}
+
+BACKEND REQUIREMENTS
+Use Node.js + Express to:
+- subscribe to MQTT topics
+- receive sensor data
+- save readings into MongoDB Atlas
+- expose REST APIs for the React Native app
+- provide latest reading
+- provide historical readings
+- provide alert/status data
+- optionally expose a control endpoint for future relay commands
+
+Backend routes should include at least:
+- GET /api/latest
+- GET /api/history
+- GET /api/status
+- GET /api/alerts
+
+DATABASE REQUIREMENTS
+Use MongoDB Atlas for storing:
+- timestamp
+- temperature
+- TDS
+- water level
+- pump state
+- threshold
+- alert status
+- manual mode flag if needed later
+
+Create a simple and clean schema for sensor logs.
+
+APP REQUIREMENTS
+Build the React Native app with:
+- a professional dashboard screen
+- a live data screen
+- a history/graph screen
+- a settings screen
+- a clean navigation structure
+- reusable components for sensor cards and status badges
+- loading states
+- error handling
+- refresh or auto-update behavior
+
+VISUAL STYLE
+Keep the UI:
+- professional
+- minimal
+- modern
+- industrial / IoT product style
+- no childish colors
+- no fancy animations unless they are subtle and useful
+- use cards, spacing, icons, and status colors sparingly
+
+ENGINEERING REQUIREMENTS
+- Write clean, readable code
+- Separate frontend, backend, and shared logic clearly
+- Use environment variables for broker URL, MongoDB connection, and API base URL
+- Add comments where necessary
+- Add README-ready structure
+- Make the code easy to extend later for TinyML and mobile control
+
+OUTPUT EXPECTATION
+Generate the project in a way that includes:
+1. React Native app code
+2. Express backend code
+3. MQTT integration
+4. MongoDB Atlas integration
+5. Basic folder structure
+6. Installation and run instructions
+7. Example `.env` file structure
+8. Sample JSON payloads for MQTT
+9. A clean README draft if possible
+
+IMPORTANT CONSTRAINTS
+- Do not make the app overdesigned
+- Do not add unnecessary features
+- Focus on reliability, readability, and professional UI
+- The app should reflect the real RO project hardware setup
+- Assume the system is for domestic use and the app must clearly show the sensor health and relay state
+- Keep the temperature cutoff fixed at 35°C for now
+- TinyML is a future enhancement only
+
+Please build the code in a practical, modular, and production-style way.
