@@ -153,6 +153,13 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      resolve-pkg-maps:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       prettier:
         specifier: ^3.8.1
@@ -209,6 +216,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       esbuild:
         specifier: 0.27.3
         version: 0.27.3
@@ -497,6 +507,9 @@ importers:
       expo-web-browser:
         specifier: ~15.0.10
         version: 15.0.10(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))
+      ms:
+        specifier: ^2.1.3
+        version: 2.1.3
       react:
         specifier: 'catalog:'
         version: 19.1.0
@@ -588,6 +601,9 @@ importers:
       mqtt:
         specifier: ^5.14.1
         version: 5.15.1
+      resolve-pkg-maps:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2930,6 +2946,11 @@ packages:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
     engines: {node: '>= 0.10'}
 
+  cross-env@7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+
   cross-fetch@3.2.0:
     resolution: {integrity: sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==}
 
@@ -3102,6 +3123,10 @@ packages:
 
   dotenv@16.4.7:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+    engines: {node: '>=12'}
+
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   drizzle-kit@0.31.9:
@@ -8957,6 +8982,10 @@ snapshots:
       object-assign: 4.1.1
       vary: 1.1.2
 
+  cross-env@7.0.3:
+    dependencies:
+      cross-spawn: 7.0.6
+
   cross-fetch@3.2.0:
     dependencies:
       node-fetch: 2.7.0
@@ -9104,6 +9133,8 @@ snapshots:
       dotenv: 16.4.7
 
   dotenv@16.4.7: {}
+
+  dotenv@17.4.2: {}
 
   drizzle-kit@0.31.9:
     dependencies:

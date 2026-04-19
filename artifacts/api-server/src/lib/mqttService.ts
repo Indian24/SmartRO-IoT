@@ -108,9 +108,15 @@ function parsePayload(topic: string, payload: Buffer): PartialTelemetry {
   const text = payload.toString("utf8").trim();
   const parsed = parseJson(text);
 
-  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-    return telemetryPayloadSchema.parse(parsed);
-  }
+  // ✅ handle full JSON payload (including ro/device/status)
+if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+  return telemetryPayloadSchema.parse(parsed);
+}
+
+// ✅ explicitly allow status topic (safety fallback)
+if (topic === MQTT_TOPICS.status && parsed) {
+  return telemetryPayloadSchema.parse(parsed);
+}
 
   const value = Number(text);
   if (!Number.isFinite(value)) throw new Error("MQTT payload must be JSON or a numeric sensor value");

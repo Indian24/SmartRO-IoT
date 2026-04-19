@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import app from "./app";
 import { iotStore } from "./lib/iotStore";
 import { logger } from "./lib/logger";

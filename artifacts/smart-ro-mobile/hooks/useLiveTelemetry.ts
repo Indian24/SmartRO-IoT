@@ -16,8 +16,12 @@ type TelemetryStreamEvent = {
   reading: SensorReading;
 };
 
-const apiDomain = process.env.EXPO_PUBLIC_DOMAIN;
-const streamUrl = apiDomain ? `https://${apiDomain}/api/stream` : "/api/stream";
+const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? process.env.EXPO_PUBLIC_DOMAIN;
+const streamUrl = apiBase
+  ? `${apiBase.replace(/\/$/, '')}/api/stream`
+  : typeof window !== 'undefined'
+  ? '/api/stream'
+  : 'http://localhost:3001/api/stream';
 
 export function useLiveTelemetry() {
   const queryClient = useQueryClient();

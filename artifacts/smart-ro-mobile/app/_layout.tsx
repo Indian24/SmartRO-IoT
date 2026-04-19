@@ -17,8 +17,15 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RoSettingsProvider } from "@/contexts/RoSettingsContext";
 
-const apiDomain = process.env.EXPO_PUBLIC_DOMAIN;
-if (apiDomain) setBaseUrl(`https://${apiDomain}`);
+const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? process.env.EXPO_PUBLIC_DOMAIN;
+if (apiBase) {
+  // Prefer an explicit API base URL; allow plain domains for backward compatibility.
+  const url = apiBase.startsWith('http') ? apiBase : `https://${apiBase}`;
+  setBaseUrl(url);
+} else {
+  // sensible default for local development
+  setBaseUrl('http://localhost:3001');
+}
 
 SplashScreen.preventAutoHideAsync();
 
