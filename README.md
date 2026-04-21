@@ -1,59 +1,192 @@
 # Smart RO Purifier IoT App
 
-Full-stack mobile application for an ESP32-based smart RO water purifier retrofit.
+An ESP32-based Smart RO water purifier retrofit with live mobile monitoring, MQTT telemetry, backend APIs, and automatic safety control. This project turns a traditional RO system into a connected IoT solution so you can track temperature, TDS, water level, pump status, and alerts from a mobile app in real time. It is built for practical domestic monitoring, remote visibility, and safer operation.
 
-## What is included
+## Key Highlights
 
-- Expo React Native mobile app in `artifacts/smart-ro-mobile`
-- Express backend in `artifacts/api-server`
-- MQTT intake for ESP32 telemetry topics
-- MongoDB Atlas persistence when `MONGODB_URI` is configured
-- REST APIs for latest readings, history, status, and alerts
-- Backend event stream for live mobile updates
-- Fixed 35°C automatic pump cutoff logic
-- Hardware pin map reflected in the app settings screen
-- MQTT simulator script for testing without ESP32 hardware
+* Real-time telemetry from an ESP32-based RO retrofit
+* Live monitoring of temperature, TDS, water level, pump state, and alerts
+* MQTT-based data pipeline for reliable device-to-backend communication
+* Express backend with REST APIs and live event streaming
+* MongoDB Atlas support for historical persistence
+* Expo React Native mobile app for a clean monitoring experience
+* Fixed automatic pump cutoff at **35°C**
+* MQTT simulator for full testing without physical hardware
+* Hardware pin mapping documented for easier firmware integration
+* Local fallback behavior when cloud services are not configured
 
-## Hardware pin map
+## Problem Statement
 
-| Component | Pin |
-| --- | --- |
-| DS18B20 temperature DATA | GPIO4 |
-| Water level analog signal | GPIO35 |
-| TDS analog signal | GPIO34 |
-| Relay IN | GPIO25 |
-| OLED SCL | GPIO22 |
-| OLED SDA | GPIO21 |
+Traditional RO purifier systems operate as isolated appliances. They usually do not provide real-time visibility into sensor readings, do not keep useful telemetry history, and do not offer automated safety behavior that can be monitored from a phone.
 
-## Environment variables
+This project solves that gap by retrofitting a standard RO setup with ESP32-based sensing, MQTT messaging, backend validation, and a mobile interface. The result is a practical IoT system that improves visibility, control, and safety without changing the core purifier workflow.
 
-Copy `.env.example` values into your deployment or local environment and fill in real values.
+## Solution Overview
 
-```bash
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority
-MONGODB_DB_NAME=smart_ro_purifier
-MONGODB_COLLECTION=sensor_logs
-MQTT_BROKER_URL=mqtt://broker-host:1883
-MQTT_USERNAME=
-MQTT_PASSWORD=
-MQTT_CLIENT_ID=smart-ro-api
-MQTT_SIM_INTERVAL_MS=5000
+The system uses a simple but robust IoT pipeline:
+
+```text
+ESP32 / MQTT Simulator → MQTT Broker → Backend API Server → REST APIs + Live Stream → Mobile App
 ```
 
-If MongoDB or MQTT are not configured, the backend keeps only a minimal in-memory development fallback so the app can still open locally.
+The ESP32 publishes sensor and device telemetry to MQTT topics. The backend subscribes to those topics, validates incoming data, applies the unchanged **35°C pump cutoff logic**, stores data when MongoDB is available, and exposes the readings through REST APIs and a live stream for the app.
 
-## MQTT topics
+## Features
 
-- `ro/sensor/temperature`
-- `ro/sensor/tds`
-- `ro/sensor/waterlevel`
-- `ro/device/status`
-- `ro/device/pump`
-- `ro/device/alert`
+* Real-time monitoring of RO telemetry
+* Temperature, TDS, and water level tracking
+* Pump relay status and safety control
+* Automatic pump cutoff at **35°C**
+* REST APIs for:
 
-## Sample MQTT payload
+  * latest reading
+  * telemetry history
+  * system status
+  * alerts
+* Live event stream for instant mobile updates
+* MongoDB Atlas persistence when configured
+* MQTT simulator support for development and testing
+* Hardware pin mapping for firmware integration
+* Mobile-first interface designed for practical monitoring
+* Clean fallback behavior when MQTT or MongoDB is not configured
 
-Publish a complete JSON payload to `ro/device/status` for the cleanest full-pipeline test:
+## System Architecture
+
+```text
++-------------------+         +------------------+         +----------------------+
+|   ESP32 Device    |         |   MQTT Broker    |         |   Backend API Server |
+|-------------------|         |------------------|         |----------------------|
+| Sensors & Relay   | ----->  | Topics & Routing | ----->  | Validate & Store     |
+| Publishes Telemetry|         |                  |         | REST + Live Stream   |
++-------------------+         +------------------+         +----------------------+
+           ^                                                           |
+           |                                                           v
+           |                                                +----------------------+
+           |                                                |   Mobile App         |
+           |                                                |----------------------|
+           |                                                | Live status, alerts  |
+           |                                                | latest values        |
+           |                                                +----------------------+
+           |
+           |                                                +----------------------+
+           +-----------------------------------------------> | MQTT Simulator       |
+                                                            | dev/test telemetry   |
+                                                            +----------------------+
+
+Optional persistence:
+Backend → MongoDB Atlas
+```
+
+### Component responsibilities
+
+**ESP32**
+
+* Reads hardware sensors
+* Controls relay / pump
+* Publishes telemetry to MQTT
+* Applies device-side logic and status updates
+
+**MQTT Broker**
+
+* Routes messages between device, simulator, and backend
+* Keeps the system decoupled and scalable
+
+**Backend API Server**
+
+* Subscribes to MQTT topics
+* Validates telemetry payloads
+* Applies the 35°C cutoff rule
+* Exposes REST APIs
+* Streams live updates to the mobile app
+* Stores records in MongoDB when configured
+
+**Mobile App**
+
+* Displays live readings
+* Shows pump state and alerts
+* Provides a clear monitoring interface for the user
+
+**MQTT Simulator**
+
+* Publishes realistic telemetry without ESP32 hardware
+* Useful for development, testing, and demo verification
+
+**MongoDB Atlas**
+
+* Stores historical telemetry and alert data when enabled
+* Helps with trend analysis and later review
+
+## Tech Stack
+
+### Frontend
+
+* Expo
+* React Native
+
+### Backend
+
+* Node.js
+* Express
+
+### IoT / Messaging
+
+* MQTT
+* Mosquitto-compatible broker
+
+### Database
+
+* MongoDB Atlas
+* In-memory fallback when MongoDB is not configured
+
+### Testing / Simulation
+
+* MQTT simulator script
+
+### Language / Tooling
+
+* TypeScript
+* pnpm
+* PowerShell on Windows
+
+## Repository Structure
+
+```text
+.
+├── artifacts/
+│   ├── api-server/          # Express backend API
+│   └── smart-ro-mobile/     # Expo React Native mobile app
+├── scripts/
+│   └── src/
+│       └── mqtt-simulator.ts # MQTT simulator for telemetry testing
+├── README.md
+└── ...
+```
+
+## Hardware Pin Map
+
+| Component                 | Pin    |
+| ------------------------- | ------ |
+| DS18B20 temperature DATA  | GPIO4  |
+| Water level analog signal | GPIO35 |
+| TDS analog signal         | GPIO34 |
+| Relay IN                  | GPIO25 |
+| OLED SCL                  | GPIO22 |
+| OLED SDA                  | GPIO21 |
+
+## MQTT Topics
+
+| Topic                   | Purpose                       |
+| ----------------------- | ----------------------------- |
+| `ro/sensor/temperature` | Temperature sensor updates    |
+| `ro/sensor/tds`         | TDS sensor updates            |
+| `ro/sensor/waterlevel`  | Water level sensor updates    |
+| `ro/device/status`      | Complete device state payload |
+| `ro/device/pump`        | Pump relay state updates      |
+| `ro/device/alert`       | Safety or system alerts       |
+
+## Sample MQTT Payload
+
+Publish a complete payload to `ro/device/status` for clean end-to-end testing:
 
 ```json
 {
@@ -65,30 +198,272 @@ Publish a complete JSON payload to `ro/device/status` for the cleanest full-pipe
 }
 ```
 
-## API routes
+This format is useful because it carries the core telemetry in one message, which makes validation, persistence, and live streaming simpler across the whole system.
 
-- `GET /api/latest`
-- `GET /api/history?limit=60`
-- `GET /api/status`
-- `GET /api/alerts?limit=20`
-- `GET /api/stream`
+## Environment Variables
 
-## Run
+Copy these into your environment and update the values for your setup.
+
+| Variable                   | Purpose                    | Example                                                                        |
+| -------------------------- | -------------------------- | ------------------------------------------------------------------------------ |
+| `MONGODB_URI`              | MongoDB connection string  | `mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority` |
+| `MONGODB_DB_NAME`          | Database name              | `smart_ro_purifier`                                                            |
+| `MONGODB_COLLECTION`       | Telemetry collection name  | `sensor_logs`                                                                  |
+| `MQTT_BROKER_URL`          | MQTT broker endpoint       | `mqtt://10.46.122.188:1883`                                                    |
+| `MQTT_USERNAME`            | MQTT username              | empty or broker-specific                                                       |
+| `MQTT_PASSWORD`            | MQTT password              | empty or broker-specific                                                       |
+| `MQTT_CLIENT_ID`           | Client identifier          | `smart-ro-api`                                                                 |
+| `MQTT_SIM_INTERVAL_MS`     | Simulator publish interval | `5000`                                                                         |
+| `EXPO_PUBLIC_API_BASE_URL` | Mobile app backend URL     | `http://10.46.122.188:3001`                                                    |
+
+MongoDB and MQTT are optional for local fallback behavior, but both are recommended for the full experience.
+
+## Local Development Setup
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd Sensible-Engineering-Choice
+```
+
+### 2. Install dependencies
 
 ```bash
 pnpm install
-pnpm --filter @workspace/api-server run dev
-pnpm --filter @workspace/smart-ro-mobile run dev
 ```
 
-The mobile app uses the shared API client and expects the API server to be reachable through the project domain in Replit.
+### 3. Configure environment variables
 
-## Test MQTT data flow
+Set the backend and app environment values for your current network. Use your laptop’s current IPv4 address.
 
-Set `MQTT_BROKER_URL` and optional credentials, start the API server, then run:
+### 4. Start the MQTT broker
+
+Start Mosquitto or your broker first. The broker must be available before the backend and device publisher start.
+
+### 5. Start the backend API
+
+The backend subscribes to MQTT topics and serves the REST APIs.
+
+### 6. Start the simulator or ESP32
+
+Use **only one telemetry source at a time** if you want clean sensor data.
+
+### 7. Start the Expo app
+
+Launch the mobile app after the backend is running so the app can reach the API and live stream.
+
+### Recommended startup order
+
+1. MQTT broker
+2. Backend API
+3. Simulator or ESP32
+4. Expo app
+
+That order matters because every later layer depends on the earlier one being available.
+
+## Three-Terminal Workflow
+
+Use these PowerShell commands on Windows.
+
+### Terminal 1 — MQTT broker
+
+```powershell
+mosquitto -c C:\mosquitto\mosquitto.conf -v
+```
+
+### Terminal 2 — Backend API
+
+```powershell
+$env:MQTT_BROKER_URL="mqtt://10.46.122.188:1883"
+pnpm --filter @workspace/api-server dev
+```
+
+### Terminal 3 — Simulator
+
+```powershell
+$env:MQTT_BROKER_URL="mqtt://10.46.122.188:1883"
+pnpm --filter @workspace/scripts mqtt:simulate
+```
+
+### Expo frontend
+
+Run this in a separate terminal from the mobile app folder:
+
+```powershell
+cd artifacts/smart-ro-mobile
+npx expo start --lan -c
+```
+
+### Important IP note
+
+Replace `10.46.122.188` with the **current IPv4 address of your laptop**. The same IP must be used in:
+
+* ESP32 code
+* backend MQTT URL
+* `EXPO_PUBLIC_API_BASE_URL`
+
+## How to Verify the System
+
+Use this checklist to confirm each layer is working:
+
+* MQTT broker starts without port conflicts
+* Backend connects and subscribes to MQTT topics
+* Simulator publishes telemetry successfully
+* ESP32 connects to the broker successfully
+* `GET /api/latest` returns valid JSON
+* `GET /api/status` returns healthy status
+* `GET /api/history` returns telemetry records
+* Mobile app shows live updates
+* MQTT logs show publish and subscribe activity
+
+### Quick verification examples
 
 ```bash
-pnpm --filter @workspace/scripts run mqtt:simulate
+http://10.46.122.188:3001/api/latest
+http://10.46.122.188:3001/api/status
+http://10.46.122.188:3001/api/history?limit=60
 ```
 
-The simulator publishes valid sensor readings to `ro/device/status`. The backend validates the payload, applies the unchanged 35°C cutoff rule, stores the reading, serves it through REST, and streams it live to the mobile app.
+## API Documentation
+
+### `GET /api/latest`
+
+Returns the most recent telemetry snapshot.
+
+### `GET /api/history?limit=60`
+
+Returns recent telemetry entries for charts and historical review.
+
+### `GET /api/status`
+
+Returns current system health and connectivity status.
+
+### `GET /api/alerts?limit=20`
+
+Returns recent alerts generated by the system.
+
+### `GET /api/stream`
+
+Provides a live event stream for real-time mobile updates.
+
+## Mobile App Experience
+
+The mobile app gives a simple live view of the purifier state:
+
+* latest temperature
+* TDS value
+* water level
+* pump status
+* alerts
+* live updates as new MQTT data arrives
+
+The goal is quick visibility, not clutter. The UI is built for practical monitoring from a phone.
+
+## Important Operational Notes
+
+* Do not run both the simulator and the ESP32 at the same time if you want clean data.
+* Use only one telemetry source at a time.
+* The automatic pump cutoff remains fixed at **35°C**.
+* If multiple sources publish to the same MQTT topic, the app may show mixed or inconsistent readings.
+* Your laptop IP can change when switching between Wi-Fi, hotspot, or other networks, so configs must be updated accordingly.
+
+## Deployment Guidance
+
+A production deployment should separate the system into stable services:
+
+* Frontend can be deployed as a web build if needed
+* Backend can be hosted on a Node-friendly platform
+* MQTT broker should be hosted on a stable broker or VPS for production
+* ESP32 should point to the deployed broker
+* Frontend should point to the deployed backend
+
+The exact deployment provider can vary, but the architecture should remain the same: device → broker → backend → app.
+
+## Troubleshooting
+
+### `MQTT_BROKER_URL is required`
+
+Set the environment variable before starting the simulator or backend.
+
+### Broker connection refused
+
+The broker is not running, the IP is wrong, or port `1883` is blocked.
+
+### Wrong IP address
+
+Update all configs after changing Wi-Fi, hotspot, or router.
+
+### Expo cannot find the `expo` package
+
+Run `pnpm install` inside the correct app workspace and start Expo from `artifacts/smart-ro-mobile`.
+
+### Backend returns `404` for `/api/latest`
+
+Telemetry has not arrived yet, or no publisher is connected.
+
+### Simulator and ESP32 both publishing
+
+Stop one of them to avoid mixed readings.
+
+### Port `1883` already in use
+
+Another MQTT broker or service is already running on that port.
+
+### Phone and laptop on different networks
+
+Make sure both are on the same hotspot or Wi-Fi network.
+
+### Local-only Mosquitto mode
+
+Use a proper Mosquitto config that allows external connections when needed.
+
+### Windows PowerShell syntax issues
+
+Use PowerShell variable syntax:
+
+```powershell
+$env:MQTT_BROKER_URL="mqtt://10.46.122.188:1883"
+```
+
+Do not use Linux shell syntax in PowerShell.
+
+## Future Improvements
+
+Possible next steps for this project include:
+
+* authenticated user accounts
+* push notifications for alerts
+* analytics dashboard and trend charts
+* role-based views for admin and user
+* deployment hardening
+* cloud MQTT integration
+* hardware fault detection
+* richer historical graphs and insights
+* multi-device support
+
+## Why This Project Stands Out
+
+This project is strong because it combines multiple real engineering layers in one practical system:
+
+* hardware integration
+* firmware logic
+* backend development
+* MQTT-based communication
+* mobile app development
+* safety automation
+* live telemetry handling
+
+It demonstrates a real IoT architecture, live data flow, and a useful domestic application. The simulator fallback also shows that the system was designed for development, testing, and demo reliability.
+
+## License
+
+Use and modification rights can be added here based on your repository policy.
+
+## Acknowledgments
+
+Built as a smart retrofit IoT solution for RO purifier monitoring and automation.
+
+## Contact
+
+Project maintainer details can be added here if needed.
